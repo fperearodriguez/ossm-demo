@@ -33,7 +33,7 @@ servicemeshoperator.v2.1.1   Red Hat OpenShift Service Mesh                   2.
 ```
 
 ### Installing the Service Mesh Control Plane
-Now, the operators are installed and it is time to install the Service Mesh Control Plane with the configuration desired. For this, set the [SMCP Configuration](./2-smcp/basic.yaml) file up with your preferences and install it.
+Now, the operators are installed and it is time to install the Service Mesh Control Plane with the configuration desired. For this, set the [SMCP Configuration](./2-ossm/basic.yaml) file up with your preferences and install it.
 
 Create the istio-system namespace
 ```
@@ -45,7 +45,7 @@ Install the Service Mesh Control Plane
 oc apply -f 2-ossm/basic.yaml
 ```
 
-You can check the installation running
+You can check the installation by executing
 ```
 oc get smcp -n istio-system
 ----
@@ -77,7 +77,7 @@ Using this object, users who don't have privileges to add members to the *Servic
 
 If you try to create the Service Mesh Member object, you will receive the following error:
 ```
-oc apply -f 2-smcp/smm-2.yaml 
+oc apply -f 2-ossm/smm.yaml 
 ----
 Error from server: error when creating "2-smcp/smm-2.yaml": admission webhook "smm.validation.maistra.io" denied the request: user '$user' does not have permission to use ServiceMeshControlPlane istio-system/basic
 ```
@@ -90,7 +90,7 @@ oc policy add-role-to-user -n istio-system --role-namespace istio-system mesh-us
 This use case will be use in the application deployment step.
 
 ## Deploying the bookinfo example application
-Service Mesh configuration for bookinfo sample application with external ratings database using an egress Gateway for routing TCP traffic. The bookinfo application will be deployed in two namespaces simulating front and back tiers.
+It is time to deploy the bookinfo sample application. The bookinfo sample application with external ratings database using an egress Gateway for routing TCP traffic. The bookinfo application will be deployed in two namespaces simulating front and back tiers.
 
 Three MySQL instances are deployed outside the Mesh in the _ddbb_ project: mysql-1, mysql-2 and mysql-3. Each mysql instance has a different rating number that will be consumed by the ratings application:
 * mysql-1: Ratings point equals 1.
@@ -99,4 +99,26 @@ Three MySQL instances are deployed outside the Mesh in the _ddbb_ project: mysql
 
 Thus, the traffic will be balanced between the different MySQL instances.
 
-Please, follow the steps indicated in this [repository](https://github.com/fperearodriguez/rhossm-egress-examples/tree/master/bookinfo-mysql-multiple-ns).
+### Deploying the bookinfo sample application
+First, create the Ingress Gateway and the OCP public route for the bookinfo application.
+
+Get the default ingress controller domain
+```bash
+OCP_DOMAIN=$(oc -n openshift-ingress-operator get ingresscontrollers default -o json | jq -r '.status.domain')
+```
+
+Replace the $EXTERNAL_DOMAIN variable in the [Gateway object](./3-ossm-networking/gw-ingress-http.yaml) and [OpenShift route object](./3-ossm-networking/route-bookinfo.yaml). Create Gateway and OpenShift route.
+
+```bash
+find ./3-ossm-networking/ -type f -print0 | xargs -0 sed -i "s/\$EXTERNAL_DOMAIN/$OCP_DOMAIN/g"
+```
+
+Create the Istio Ingress Gateway
+```bash
+oc apply -f ./3-ossm-networking/gw-ingress-http.yaml
+oc apply -f ./3-ossm-networking/route-bookinfo.yaml
+```
+
+Now, follow the steps indicated in this [repository](https://github.com/fperearodriguez/rhossm-egress-examples/tree/master/bookinfo-mysql-multiple-ns).
+
+### Traffic management use cases
