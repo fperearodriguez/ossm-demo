@@ -17,4 +17,4 @@ spec:
     route:
     - destination:
         host: ratings
-        subset: v1
+        subset: v2-mysql

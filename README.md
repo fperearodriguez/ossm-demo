@@ -271,18 +271,18 @@ Apply this configuration:
 oc apply -n back -f 7-traffic-management/lab2/vs-reviews-shifting-50-50.yaml
 ```
 
-### Delete VS
-Finally, delete the VS used
-```
-oc delete -n back -f 7-traffic-management/lab2/
-```
-
 ### Route all the traffic to the new service
 The _reviews_ VS to add a 100% routing rule to the new service.
 
 Apply this configuration:
 ```bash
 oc apply -n back -f 7-traffic-management/lab2/vs-reviews-shifting-0-100.yaml
+```
+
+### Delete VS
+Finally, delete the VS used
+```
+oc delete -n back -f 7-traffic-management/lab2/
 ```
 
 ## Lab 3: Fault Injection

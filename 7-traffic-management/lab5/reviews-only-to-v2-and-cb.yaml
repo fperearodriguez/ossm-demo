@@ -9,11 +9,10 @@ spec:
   - back
   - front
   http:
-    - route:
-        - destination:
-            host: reviews
-            subset: v2
-          weight: 100
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
 --- 
 kind: DestinationRule
 apiVersion: networking.istio.io/v1alpha3
